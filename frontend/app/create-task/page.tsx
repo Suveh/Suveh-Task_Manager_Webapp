@@ -4,85 +4,214 @@ import { useState } from "react";
 import API from "../../services/api";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { FiPlus, FiXCircle } from "react-icons/fi";
+import { MdTitle, MdDescription, MdDateRange, MdFlag } from "react-icons/md";
+import { BsCalendarDate } from "react-icons/bs";
+import { IoArrowBack } from "react-icons/io5";
 
-export default function CreateTask(){
+export default function CreateTask() {
+    const router = useRouter();
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [dueDate, setDueDate] = useState("");
+    const [priority, setPriority] = useState("MEDIUM"); // Default to MEDIUM
+    const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter()
+    const token =
+        typeof window !== "undefined"
+            ? localStorage.getItem("token")
+            : "";
 
-  const [title,setTitle] = useState("")
-  const [description,setDescription] = useState("")
-  const [dueDate,setDueDate] = useState("")
+    const createTask = async () => {
+        setIsLoading(true);
+        try {
+            await API.post(
+                "/tasks",
+                {
+                    title,
+                    description,
+                    status: "TODO",
+                    priority: priority, 
+                    dueDate: dueDate || null
+                },
+                {
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                }
+            );
+            router.push("/dashboard");
+        } catch (error) {
+            console.error("Failed to create task:", error);
+            alert("Failed to create task. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("token")
-      : ""
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50">
+            <Navbar />
+            
+            {/* Background Decoration */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+            </div>
 
-  const createTask = async()=>{
+            <div className="relative flex justify-center items-start pt-20 px-4 pb-10">
+                <div className="bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8 w-full max-w-lg border border-white/20">
+                    {/* Header with Back Button */}
+                    <div className="flex items-center gap-4 mb-6">
+                        <button
+                            onClick={() => router.push("/dashboard")}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
+                        >
+                            <IoArrowBack className="w-5 h-5 text-gray-600 group-hover:text-indigo-600" />
+                        </button>
+                        <div>
+                            <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                Create New Task
+                            </h2>
+                        </div>
+                    </div>
 
-    await API.post("/tasks",
-    {
-      title,
-      description,
-      status:"TODO",
-      priority:"HIGH",
-      dueDate
-    },
-    {
-      headers:{
-        Authorization:"Bearer "+token
-      }
-    })
+                    <div className="space-y-5">
+                        {/* Title Input */}
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-gray-700 ml-1 flex items-center gap-1">
+                                
+                                Task Title <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                placeholder="e.g., Complete project report"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                            />
+                        </div>
 
-    router.push("/dashboard")
-  }
+                        {/* Description Input */}
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-gray-700 ml-1 flex items-center gap-1">
+                                
+                                Description <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                placeholder="Describe your task in detail..."
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                rows={4}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/50 backdrop-blur-sm resize-none"
+                            />
+                        </div>
 
-  return(
+                        {/* Priority Selection - ADD THIS */}
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-gray-700 ml-1 flex items-center gap-1">
+                                
+                                Priority
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setPriority("LOW")}
+                                    className={`py-2 px-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-1 ${
+                                        priority === "LOW"
+                                            ? "border-green-500 bg-green-50 text-green-700"
+                                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                                    }`}
+                                >
+                                    <span>🟢</span> Low
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPriority("MEDIUM")}
+                                    className={`py-2 px-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-1 ${
+                                        priority === "MEDIUM"
+                                            ? "border-yellow-500 bg-yellow-50 text-yellow-700"
+                                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                                    }`}
+                                >
+                                    <span>🟡</span> Medium
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPriority("HIGH")}
+                                    className={`py-2 px-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-1 ${
+                                        priority === "HIGH"
+                                            ? "border-red-500 bg-red-50 text-red-700"
+                                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                                    }`}
+                                >
+                                    <span>🔴</span> High
+                                </button>
+                            </div>
+                        </div>
 
-    <div className="min-h-screen bg-gray-100">
+                        {/* Due Date Input */}
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-gray-700 ml-1 flex items-center gap-1">
+                                
+                                Due Date (Optional)
+                            </label>
+                            <div className="relative">
+                                <MdDateRange className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="datetime-local"
+                                    value={dueDate}
+                                    onChange={(e) => setDueDate(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                                />
+                            </div>
+                        </div>
 
-      <Navbar/>
+                        {/* Action Buttons */}
+                        <div className="space-y-3 pt-4">
+                            <button
+                                onClick={createTask}
+                                disabled={isLoading || !title || !description}
+                                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                        <span>Creating...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiPlus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                                        <span>Create Task</span>
+                                    </>
+                                )}
+                            </button>
 
-      <div className="flex justify-center pt-20">
+                            <button
+                                onClick={() => router.push("/dashboard")}
+                                className="w-full border-2 border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-700 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 group"
+                            >
+                                
+                                <span>Cancel</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <div className="bg-white p-8 rounded shadow w-96">
-
-          <h2 className="text-2xl font-bold mb-4">
-          Create Task
-          </h2>
-
-          <input
-          placeholder="Title"
-          value={title}
-          onChange={(e)=>setTitle(e.target.value)}
-          className="border p-2 w-full mb-3"
-          />
-
-          <input
-          placeholder="Description"
-          value={description}
-          onChange={(e)=>setDescription(e.target.value)}
-          className="border p-2 w-full mb-3"
-          />
-
-          <input
-          type="datetime-local"
-          value={dueDate}
-          onChange={(e)=>setDueDate(e.target.value)}
-          className="border p-2 w-full mb-4"
-          />
-
-          <button
-          onClick={createTask}
-          className="bg-blue-500 text-white w-full py-2 rounded">
-          Create Task
-          </button>
-
+            <style jsx>{`
+                @keyframes blob {
+                    0% { transform: translate(0px, 0px) scale(1); }
+                    33% { transform: translate(30px, -50px) scale(1.1); }
+                    66% { transform: translate(-20px, 20px) scale(0.9); }
+                    100% { transform: translate(0px, 0px) scale(1); }
+                }
+                .animate-blob {
+                    animation: blob 7s infinite;
+                }
+                .animation-delay-2000 {
+                    animation-delay: 2s;
+                }
+            `}</style>
         </div>
-
-      </div>
-
-    </div>
-
-  )
+    );
 }
