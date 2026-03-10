@@ -22,7 +22,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public Task createTask(@Valid@RequestBody Task task) {
+    public Task createTask(@Valid @RequestBody Task task) {
         return taskService.createTask(task);
     }
 
@@ -30,7 +30,6 @@ public class TaskController {
     public List<Task> getTasks() {
         return taskService.getTasks();
     }
-    ///
 
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable Long id) {
@@ -59,14 +58,15 @@ public class TaskController {
     }
 
     @GetMapping("/filter")
-public List<Task> filterTasks(
-        @RequestParam(required = false) TaskStatus status,
-        @RequestParam(required = false) TaskPriority priority) {
+    public List<Task> filterTasks(
+            @RequestParam(required = false) TaskStatus status,
+            @RequestParam(required = false) TaskPriority priority) {
 
-    return taskService.filterTasks(status, priority);
-}
-@PutMapping("/{id}/complete")
-public Task completeTask(@PathVariable Long id) {
-    return taskService.markCompleted(id);
-}
+        return taskService.filterTasks(status, priority);
+    }
+
+    @PutMapping("/{id}/complete")
+    public Task completeTask(@PathVariable Long id) {
+        return taskService.markCompleted(id);
+    }
 }
